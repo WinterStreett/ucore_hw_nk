@@ -41,10 +41,10 @@ static void check_pgfault(void);
 // mm_create -  alloc a mm_struct & initialize it.
 struct mm_struct *
 mm_create(void) {
-    struct mm_struct *mm = kmalloc(sizeof(struct mm_struct));
+    struct mm_struct *mm = kmalloc(sizeof(struct mm_struct));//给mm分配合适大小的页
 
-    if (mm != NULL) {
-        list_init(&(mm->mmap_list));
+    if (mm != NULL) {//如果分配成功
+        list_init(&(mm->mmap_list));//初始化mmap_list列表
         mm->mmap_cache = NULL;
         mm->pgdir = NULL;
         mm->map_count = 0;
@@ -58,9 +58,9 @@ mm_create(void) {
 // vma_create - alloc a vma_struct & initialize it. (addr range: vm_start~vm_end)
 struct vma_struct *
 vma_create(uintptr_t vm_start, uintptr_t vm_end, uint32_t vm_flags) {
-    struct vma_struct *vma = kmalloc(sizeof(struct vma_struct));
+    struct vma_struct *vma = kmalloc(sizeof(struct vma_struct));//分配页空间，vam和mm都是在分页基础上的
 
-    if (vma != NULL) {
+    if (vma != NULL) {//如果分配成功了
         vma->vm_start = vm_start;
         vma->vm_end = vm_end;
         vma->vm_flags = vm_flags;
@@ -98,6 +98,7 @@ find_vma(struct mm_struct *mm, uintptr_t addr) {
 
 
 // check_vma_overlap - check if vma1 overlaps vma2 ?
+// Vma1和Vma2是否有重叠的部分
 static inline void
 check_vma_overlap(struct vma_struct *prev, struct vma_struct *next) {
     assert(prev->vm_start < prev->vm_end);
@@ -319,15 +320,18 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
             /* error code flag : default is 3 ( W/R=1, P=1): write, present */
     case 2: /* error code flag : (W/R=1, P=0): write, not present */
         if (!(vma->vm_flags & VM_WRITE)) {
+            //addr对应的页存在于物理内存中，可惜是个不可写页，而程序不小心试图写它
             cprintf("do_pgfault failed: error code flag = write AND not present, but the addr's vma cannot write\n");
             goto failed;
         }
         break;
     case 1: /* error code flag : (W/R=0, P=1): read, present */
+        //我估计这一条意思是，addr映射到的物理页，根本不存在，也不知道怎么触发。。。
         cprintf("do_pgfault failed: error code flag = read AND present\n");
         goto failed;
     case 0: /* error code flag : (W/R=0, P=0): read, not present */
         if (!(vma->vm_flags & (VM_READ | VM_EXEC))) {
+        //addr对应的页存在于物理内存中，可惜既不能读也不能执行，而程序不小心试图读它
             cprintf("do_pgfault failed: error code flag = read AND not present, but the addr's vma cannot read or exec\n");
             goto failed;
         }
@@ -347,6 +351,22 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
     ret = -E_NO_MEM;
 
     pte_t *ptep=NULL;
+    //练习一代码
+     // try to find a pte, if pte's PT(Page Table) isn't existed, then create a PT.
+    // (notice the 3th parameter '1')
+    if ((ptep = get_pte(mm->pgdir, addr, 1)) == NULL) {//为这个addr找一个PTE，如果没有，新建一个
+        cprintf("get_pte in do_pgfault failed\n");
+        goto failed;
+    }
+    
+    //ptep内容如果为全0，意味着这个PTE还没有被使用，逻辑地址还没有被映射到某个物理地址
+    if (*ptep == 0) { // if the phy addr isn't exist, then alloc a page & map the phy addr with logical addr
+        if (pgdir_alloc_page(mm->pgdir, addr, perm) == NULL) {//为这个逻辑地址映射一个物理页
+            cprintf("pgdir_alloc_page in do_pgfault failed\n");
+            goto failed;
+        }
+    }   
+
     /*LAB3 EXERCISE 1: YOUR CODE
     * Maybe you want help comment, BELOW comments can help you finish the code
     *
@@ -372,7 +392,7 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
 
     }
     else {
-    /*LAB3 EXERCISE 2: YOUR CODE
+    /*LAB3 EXERCISE 2: YOUR COD
     * Now we think this pte is a  swap entry, we should load data from disk to a page with phy addr,
     * and map the phy addr with logical addr, trigger swap manager to record the access situation of this page.
     *
