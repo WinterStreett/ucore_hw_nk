@@ -32,7 +32,6 @@ kern_init(void) {
     grade_backtrace();
 
     pmm_init();                 // init physical memory management
-
     pic_init();                 // init interrupt controller
     idt_init();                 // init interrupt descriptor table
 
@@ -41,7 +40,9 @@ kern_init(void) {
     ide_init();                 // init ide devices
     swap_init();                // init swap
 
+
     clock_init();               // init clock interrupt
+
     intr_enable();              // enable irq interrupt
 
     //LAB1: CAHLLENGE 1 If you try to do it, uncomment lab1_switch_test()

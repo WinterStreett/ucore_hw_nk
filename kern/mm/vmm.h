@@ -35,6 +35,7 @@ struct mm_struct {
     void *sm_priv;                   // the private data for swap manager
 };
 
+
 struct vma_struct *find_vma(struct mm_struct *mm, uintptr_t addr);
 struct vma_struct *vma_create(uintptr_t vm_start, uintptr_t vm_end, uint32_t vm_flags);
 void insert_vma_struct(struct mm_struct *mm, struct vma_struct *vma);

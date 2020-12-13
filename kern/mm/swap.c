@@ -1,13 +1,24 @@
 #include <swap.h>
 #include <swapfs.h>
-// #include <swap_fifo.h>
-#include <swap_eclock.h>
+#include <swap_fifo.h>
+// #include <swap_eclock.h>
+// #include<swap_lru.h>
 #include <stdio.h>
 #include <string.h>
 #include <memlayout.h>
 #include <pmm.h>
 #include <mmu.h>
 
+#define GET_LIST_ENTRY_PTE(pgdir, le)  (get_pte((pgdir), le2page((le), pra_page_link)->pra_vaddr, 0))
+#define GET_DIRTY_FLAG(pgdir, le)      (*GET_LIST_ENTRY_PTE((pgdir), (le)) & PTE_D)
+#define GET_ACCESSED_FLAG(pgdir, le)   (*GET_LIST_ENTRY_PTE((pgdir), (le)) & PTE_A)
+#define CLEAR_ACCESSED_FLAG(pgdir, le) do {\
+    struct Page *page = le2page((le), pra_page_link);\
+    pte_t *ptep = get_pte((pgdir), page->pra_vaddr, 0);\
+    *ptep = *ptep & ~PTE_A;\
+    tlb_invalidate((pgdir), page->pra_vaddr);\
+} while (0)
+uint16_t isbegin = 0;
 // the valid vaddr for check is between 0~CHECK_VALID_VADDR-1
 #define CHECK_VALID_VIR_PAGE_NUM 5
 #define BEING_CHECK_VALID_VADDR 0X1000
@@ -26,6 +37,7 @@ unsigned int swap_page[CHECK_VALID_VIR_PAGE_NUM];
 
 unsigned int swap_in_seq_no[MAX_SEQ_NO],swap_out_seq_no[MAX_SEQ_NO];
 
+
 static void check_swap(void);
 
 int
@@ -39,8 +51,10 @@ swap_init(void)
      }
      
 
-     // sm = &swap_manager_fifo;
-     sm = &swap_manager_eclock;
+     sm = &swap_manager_fifo;
+     // sm = &swap_manager_eclock;
+     // sm = &swap_manager_lru;
+     
      int r = sm->init();
      
      if (r == 0)
@@ -163,6 +177,7 @@ check_content_set(void)
 static inline int
 check_content_access(void)
 {
+     isbegin = 1;
     int ret = sm->check_swap();
     return ret;
 }
@@ -278,4 +293,23 @@ check_swap(void)
      //assert(count == 0);
      
      cprintf("check_swap() succeeded!\n");
+}
+
+void heat_trace()
+{
+     if(isbegin==1)
+     {
+          list_entry_t *head=(list_entry_t*) check_mm_struct->sm_priv;
+          assert(head != NULL);
+          list_entry_t *p = head;
+          do{
+               if(GET_ACCESSED_FLAG(check_mm_struct->pgdir, p) == 1)
+               {
+                    le2page(p,pra_page_link)->heat += 1;
+               }
+               CLEAR_ACCESSED_FLAG(check_mm_struct->pgdir, p);
+               p = list_next(p);
+          }while(p != head);
+          cprintf("o");
+     }
 }

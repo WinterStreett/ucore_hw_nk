@@ -196,9 +196,11 @@ trap_dispatch(struct trapframe *tf) {
          * (3) Too Simple? Yes, I think so!
          */
         ticks ++;
+            // heat_trace();
         if (ticks % TICK_NUM == 0) {
             print_ticks();
         }
+
         break;
     case IRQ_OFFSET + IRQ_COM1:
         c = cons_getc();

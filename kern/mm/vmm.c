@@ -320,18 +320,18 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
             /* error code flag : default is 3 ( W/R=1, P=1): write, present */
     case 2: /* error code flag : (W/R=1, P=0): write, not present */
         if (!(vma->vm_flags & VM_WRITE)) {
-            //addr对应的页存在于物理内存中，可惜是个不可写页，而程序不小心试图写它
+            //addr对应的页不存在于物理内存中，是个不可写页，而程序不小心试图写它
             cprintf("do_pgfault failed: error code flag = write AND not present, but the addr's vma cannot write\n");
             goto failed;
         }
         break;
     case 1: /* error code flag : (W/R=0, P=1): read, present */
-        //我估计这一条意思是，addr映射到的物理页，根本不存在，是说这个物理页的地址是不合法的地址吧
+        //这个页在物理内存中，但是还是报错了，因为权限问题，这肯定不需要os处理
         cprintf("do_pgfault failed: error code flag = read AND present\n");
         goto failed;
     case 0: /* error code flag : (W/R=0, P=0): read, not present */
         if (!(vma->vm_flags & (VM_READ | VM_EXEC))) {
-        //addr对应的页存在于物理内存中，可惜既不能读也不能执行，而程序不小心试图读它
+        //addr对应的页不存在于物理内存中，既不能读也不能执行，而程序不小心试图读它或执行它
             cprintf("do_pgfault failed: error code flag = read AND not present, but the addr's vma cannot read or exec\n");
             goto failed;
         }
