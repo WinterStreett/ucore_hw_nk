@@ -127,7 +127,6 @@ default_alloc_pages(size_t n) {
     }
     struct Page *page = NULL;
     list_entry_t *le = &free_list;
-    // TODO: optimize (next-fit)
     while ((le = list_next(le)) != &free_list) {
         struct Page *p = le2page(le, page_link);
         if (p->property >= n) {
@@ -164,7 +163,6 @@ default_free_pages(struct Page *base, size_t n) {
     while (le != &free_list) {
         p = le2page(le, page_link);
         le = list_next(le);
-        // TODO: optimize
         if (base + base->property == p) {
             base->property += p->property;
             ClearPageProperty(p);
@@ -304,6 +302,7 @@ default_check(void) {
 
     le = &free_list;
     while ((le = list_next(le)) != &free_list) {
+        assert(le->next->prev == le && le->prev->next == le);
         struct Page *p = le2page(le, page_link);
         count --, total -= p->property;
     }
@@ -320,3 +319,4 @@ const struct pmm_manager default_pmm_manager = {
     .nr_free_pages = default_nr_free_pages,
     .check = default_check,
 };
+

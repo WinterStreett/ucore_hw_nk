@@ -375,18 +375,20 @@ get_pte(pde_t *pgdir, uintptr_t la, bool create) {
     }
     return NULL;          // (8) return page table entry
 #endif
-    pde_t *pdep = &pgdir[PDX(la)];
-    if (!(*pdep & PTE_P)) {
-        struct Page *page;
+    pde_t *pdep = &pgdir[PDX(la)];//获取二级页表的地址
+    if (!(*pdep & PTE_P)) {//如果该二级页表还没有分配物理空间
+        struct Page *page;//分配一个
         if (!create || (page = alloc_page()) == NULL) {
             return NULL;
         }
+        //下面都是给新页初始化属性
         set_page_ref(page, 1);
         uintptr_t pa = page2pa(page);
         memset(KADDR(pa), 0, PGSIZE);
         *pdep = pa | PTE_U | PTE_W | PTE_P;
+        //得到一个被引用数为1，内容为空，权限极低的二级页表页
     }
-    return &((pte_t *)KADDR(PDE_ADDR(*pdep)))[PTX(la)];
+    return &((pte_t *)KADDR(PDE_ADDR(*pdep)))[PTX(la)];//通过查二级页表返回对应页表项的地址
 }
 
 //get_page - get related Page struct for linear address la using PDT pgdir
@@ -424,7 +426,7 @@ page_remove_pte(pde_t *pgdir, uintptr_t la, pte_t *ptep) {
      *   PTE_P           0x001                   // page table/directory entry flags bit : Present
      */
 #if 0
-    if (0) {                      //(1) check if page directory is present
+    if (0) {                      //(1) check if this page table entry is present
         struct Page *page = NULL; //(2) find corresponding page to pte
                                   //(3) decrease page reference
                                   //(4) and free this page when page reference reachs 0
@@ -432,13 +434,13 @@ page_remove_pte(pde_t *pgdir, uintptr_t la, pte_t *ptep) {
                                   //(6) flush tlb
     }
 #endif
-    if (*ptep & PTE_P) {
-        struct Page *page = pte2page(*ptep);
-        if (page_ref_dec(page) == 0) {
-            free_page(page);
+        if (*ptep & PTE_P) {//如果逻辑地址所映射到的page，已经分配了内存
+        struct Page *page = pte2page(*ptep);//通过宏，得到二级页表项所指向的page
+        if (page_ref_dec(page) == 0) {//由于这个逻辑地址不再指向page了，所以page少了一次引用次数
+            free_page(page);//如果page的被引用次数为0，就释放掉该页
         }
-        *ptep = 0;
-        tlb_invalidate(pgdir, la);
+        *ptep = 0;//讲该二级页表项清空
+        tlb_invalidate(pgdir, la);//TLB更新
     }
 }
 
