@@ -5,3 +5,15 @@
 笔记：
 控制流：kern_inti --> proc_init --> 创建idleproc，0号线程 --
 > kernel_thread创建initproc线程 -->kernel_thread_entry -->main
+
+lab1：kern/debug/kdebug.c
+      trap/trap.c
+
+lab2: mm/pmm.c
+      mm/default_pmm.c
+
+
+lab3: mm/vmm.c
+      mm/swap_fifo.c
+
+lab4: process/proc.c
