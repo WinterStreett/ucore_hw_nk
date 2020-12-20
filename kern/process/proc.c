@@ -645,7 +645,7 @@ load_icode(unsigned char *binary, size_t size) {
     tf->tf_ds = tf->tf_es = tf->tf_ss = USER_DS;
     tf->tf_esp = USTACKTOP;
     tf->tf_eip = elf->e_entry;
-    tf->tf_eflags = FL_IF;
+    tf->tf_eflags |= FL_IF;//改了
     ret = 0;
 out:
     return ret;
@@ -846,8 +846,6 @@ init_main(void *arg) {
     // assert(nr_process == 2);
     assert(list_next(&proc_list) == &(initproc->list_link));
     assert(list_prev(&proc_list) == &(initproc->list_link));
-    // assert(nr_free_pages_store == nr_free_pages());
-    // assert(kernel_allocated_store == kallocated());
     cprintf("init check memory pass.\n");
     return 0;
 }
