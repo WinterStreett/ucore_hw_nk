@@ -420,9 +420,8 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
 	if ((proc = alloc_proc()) == NULL) {
         goto fork_out;
     }
-
     proc->parent = current;
-    assert(current->wait_state == 0);
+   assert(current->wait_state == 0);
 
     if (setup_kstack(proc) != 0) {
         goto bad_fork_cleanup_proc;
@@ -438,8 +437,6 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
         proc->pid = get_pid();
         hash_proc(proc);
         set_links(proc);
-        list_add(&proc_list, &(proc->list_link));
-        nr_process ++;
     }
     local_intr_restore(intr_flag);
 
@@ -846,10 +843,11 @@ init_main(void *arg) {
 
     cprintf("all user-mode processes have quit.\n");
     assert(initproc->cptr == NULL && initproc->yptr == NULL && initproc->optr == NULL);
-    assert(nr_process == 2);
+    // assert(nr_process == 2);
     assert(list_next(&proc_list) == &(initproc->list_link));
     assert(list_prev(&proc_list) == &(initproc->list_link));
-
+    // assert(nr_free_pages_store == nr_free_pages());
+    // assert(kernel_allocated_store == kallocated());
     cprintf("init check memory pass.\n");
     return 0;
 }
