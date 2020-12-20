@@ -843,7 +843,7 @@ init_main(void *arg) {
 
     cprintf("all user-mode processes have quit.\n");
     assert(initproc->cptr == NULL && initproc->yptr == NULL && initproc->optr == NULL);
-    // assert(nr_process == 2);
+    assert(nr_process == 2);
     assert(list_next(&proc_list) == &(initproc->list_link));
     assert(list_prev(&proc_list) == &(initproc->list_link));
     cprintf("init check memory pass.\n");

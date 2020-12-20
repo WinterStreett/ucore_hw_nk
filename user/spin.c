@@ -24,6 +24,7 @@ main(void) {
     cprintf("wait returns %d\n", ret);
 
     cprintf("spin may pass.\n");
+
     return 0;
 }
 

@@ -2,7 +2,7 @@
 
 Special kernel symbols:
   entry  0xc0100036 (phys)
-  etext  0xc010bed5 (phys)
+  etext  0xc010bf00 (phys)
   edata  0xc019f000 (phys)
   end    0xc01a214c (phys)
 Kernel executable memory footprint: 649KB
@@ -10,15 +10,15 @@ ebp:0xc012af38  eip:0xc0100ba8    arg:0x00010094    0x00010094    0xc012af68    
     kern/debug/kdebug.c:351: print_stackframe+21
 ebp:0xc012af48  eip:0xc0100e9e    arg:0x00000000    0x00000000    0x00000000    0xc012afb8    0x00010094    
     kern/debug/kmonitor.c:129: mon_backtrace+10
-ebp:0xc012af68  eip:0xc01000df    arg:0x00000000    0xc012af90    0xffff0000    0xc012af94    0xc010c05c    
+ebp:0xc012af68  eip:0xc01000df    arg:0x00000000    0xc012af90    0xffff0000    0xc012af94    0xc010c07c    
     kern/init/init.c:58: grade_backtrace2+33
-ebp:0xc012af88  eip:0xc0100109    arg:0x00000000    0xffff0000    0xc012afb4    0x0000002a    0xc010befc    
+ebp:0xc012af88  eip:0xc0100109    arg:0x00000000    0xffff0000    0xc012afb4    0x0000002a    0xc010bf1c    
     kern/init/init.c:63: grade_backtrace1+38
 ebp:0xc012afa8  eip:0xc0100128    arg:0x00000000    0xc0100036    0xffff0000    0x0000001d    0xc019f000    
     kern/init/init.c:68: grade_backtrace0+23
-ebp:0xc012afc8  eip:0xc010014e    arg:0xc010befc    0xc010bee0    0x0000314c    0x00000000    0x00000000    
+ebp:0xc012afc8  eip:0xc010014e    arg:0xc010bf1c    0xc010bf00    0x0000314c    0x00000000    0x00000000    
     kern/init/init.c:73: grade_backtrace+34
-ebp:0xc012aff8  eip:0xc010008b    arg:0xc010c0e4    0xc010c0ec    0xc0100e26    0xc010c10b    0xc010c114    
+ebp:0xc012aff8  eip:0xc010008b    arg:0xc010c104    0xc010c10c    0xc0100e26    0xc010c12b    0xc010c134    
     kern/init/init.c:33: kern_init+84
 memory management: default_pmm_manager
 e820map:
@@ -119,12 +119,11 @@ kernel panic at kern/process/proc.c:466:
     initproc exit.
 
 stack trackback:
-ebp:0xc0384f88  eip:0xc0100ba8    arg:0xc010bfa8    0xc0384fcc    0x000001d2    0xc0384fb8    0x00000018    
+ebp:0xc0384f88  eip:0xc0100ba8    arg:0xc010bfc8    0xc0384fcc    0x000001d2    0xc0384fb8    0x00000018    
     kern/debug/kdebug.c:351: print_stackframe+21
-ebp:0xc0384fb8  eip:0xc0100468    arg:0xc010e000    0x000001d2    0xc010e052    0x00000000    0xc01a2144    
+ebp:0xc0384fb8  eip:0xc0100468    arg:0xc010e020    0x000001d2    0xc010e072    0x00000000    0xc01a2144    
     kern/debug/panic.c:27: __panic+103
-ebp:0xc0384fe8  eip:0xc010a05b    arg:0x00000000    0x00000000    0x00000000    0x00000010    0x00000000    
+ebp:0xc0384fe8  eip:0xc010a04f    arg:0x00000000    0x00000000    0x00000000    0x00000010    0x00000000    
     kern/process/proc.c:466: do_exit+91
 Welcome to the kernel debug monitor!!
 Type 'help' for a list of commands.
-K> 
